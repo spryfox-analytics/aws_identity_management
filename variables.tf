@@ -17,6 +17,11 @@ variable "viewers_account_numbers" {
   default = []
 }
 
+variable "support_agents_account_numbers" {
+  type = list(string)
+  default = []
+}
+
 variable "customer_name" {
   type = string
 }

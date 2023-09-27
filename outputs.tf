@@ -9,3 +9,7 @@ output "permission_set_development_arn" {
 output "permission_set_administration_arn" {
   value = var.project_name == "" ? aws_ssoadmin_permission_set.administration[0].arn : data.external.administration_permission_set_arn.result.arn
 }
+
+output "permission_set_support_arn" {
+  value = var.project_name == "" ? aws_ssoadmin_permission_set.support[0].arn : data.external.support_permission_set_arn.result.arn
+}

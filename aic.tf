@@ -122,3 +122,23 @@ resource "aws_ssoadmin_managed_policy_attachment" "administration" {
 data "external" "administration_permission_set_arn" {
   program = ["bash", "${path.module}/permission_set_arn_retriever.sh", "admin", var.aws_region]
 }
+
+resource "aws_ssoadmin_permission_set" "support" {
+  count            = var.project_name == "" ? 1 : 0
+  name             = "support"
+  description      = "Support access to AWS account"
+  instance_arn     = tolist(data.aws_ssoadmin_instances.identity_stores.arns)[0]
+  relay_state      = "https://s3.console.aws.amazon.com/s3/home?region=${var.aws_region}#"
+  session_duration = "PT1H"
+}
+
+resource "aws_ssoadmin_managed_policy_attachment" "support" {
+  count              = var.project_name == "" ? 1 : 0
+  instance_arn       = tolist(data.aws_ssoadmin_instances.identity_stores.arns)[0]
+  managed_policy_arn = "arn:aws:iam::aws:policy/AWSSupportAccess"
+  permission_set_arn = aws_ssoadmin_permission_set.support[0].arn
+}
+
+data "external" "support_permission_set_arn" {
+  program = ["bash", "${path.module}/permission_set_arn_retriever.sh", "support", var.aws_region]
+}
