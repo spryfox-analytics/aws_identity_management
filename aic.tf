@@ -46,8 +46,7 @@ data "aws_iam_policy_document" "athena_querying" {
   statement {
     effect    = "Allow"
     resources = [
-      "arn:aws:s3:::luscii-athena-query-*",
-      "arn:aws:s3:::rh-athena-query-*"
+      "arn:aws:s3:::*-athena-query-*"
     ]
     actions = [
       "s3:GetBucketLocation",
