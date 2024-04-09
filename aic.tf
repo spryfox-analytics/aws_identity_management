@@ -10,7 +10,7 @@ resource "aws_ssoadmin_permission_set" "view" {
   description      = "Viewer access to AWS account"
   instance_arn     = tolist(data.aws_ssoadmin_instances.identity_stores.arns)[0]
   relay_state      = "https://s3.console.aws.amazon.com/s3/home?region=${var.aws_region}#"
-  session_duration = "PT2H"
+  session_duration = "PT12H"
 }
 
 resource "aws_ssoadmin_managed_policy_attachment" "view" {
@@ -88,7 +88,7 @@ resource "aws_ssoadmin_permission_set" "development" {
   description      = "Development access to AWS account"
   instance_arn     = tolist(data.aws_ssoadmin_instances.identity_stores.arns)[0]
   relay_state      = "https://s3.console.aws.amazon.com/s3/home?region=${var.aws_region}#"
-  session_duration = "PT1H"
+  session_duration = "PT12H"
 }
 
 resource "aws_ssoadmin_managed_policy_attachment" "development" {
@@ -108,7 +108,7 @@ resource "aws_ssoadmin_permission_set" "administration" {
   description      = "Administration access to AWS account"
   instance_arn     = tolist(data.aws_ssoadmin_instances.identity_stores.arns)[0]
   relay_state      = "https://s3.console.aws.amazon.com/s3/home?region=${var.aws_region}#"
-  session_duration = "PT1H"
+  session_duration = "PT12H"
 }
 
 resource "aws_ssoadmin_managed_policy_attachment" "administration" {
@@ -128,7 +128,7 @@ resource "aws_ssoadmin_permission_set" "support" {
   description      = "Support access to AWS account"
   instance_arn     = tolist(data.aws_ssoadmin_instances.identity_stores.arns)[0]
   relay_state      = "https://s3.console.aws.amazon.com/s3/home?region=${var.aws_region}#"
-  session_duration = "PT1H"
+  session_duration = "PT12H"
 }
 
 resource "aws_ssoadmin_managed_policy_attachment" "support" {
