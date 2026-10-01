@@ -30,7 +30,7 @@ data "aws_iam_policy_document" "athena_querying" {
   statement {
     effect    = "Allow"
     resources = ["*"]
-    actions   = [
+    actions = [
       "glue:GetDatabase",
       "glue:GetDatabases",
       "glue:CreateTable",
@@ -44,7 +44,7 @@ data "aws_iam_policy_document" "athena_querying" {
     ]
   }
   statement {
-    effect    = "Allow"
+    effect = "Allow"
     resources = [
       "arn:aws:s3:::*-athena-query-*"
     ]
@@ -59,7 +59,7 @@ data "aws_iam_policy_document" "athena_querying" {
     ]
   }
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "kms:Encrypt",
       "kms:Decrypt",
@@ -95,6 +95,57 @@ resource "aws_ssoadmin_managed_policy_attachment" "development" {
   count              = var.project_name == "" ? 1 : 0
   instance_arn       = tolist(data.aws_ssoadmin_instances.identity_stores.arns)[0]
   managed_policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+  permission_set_arn = aws_ssoadmin_permission_set.development[0].arn
+}
+
+# The permission set dev is the role for daily work. One permission set gives the same role in every
+# account, so its rights per account follow from conditions on the account of the role: everything in
+# the development accounts, running the pipelines in the pipeline accounts, and elsewhere reading plus
+# Athena queries, as view. Deployments to the other accounts go through the approved pipelines.
+data "aws_iam_policy_document" "development" {
+  count                   = var.project_name == "" ? 1 : 0
+  source_policy_documents = [data.aws_iam_policy_document.athena_querying[0].json]
+
+  dynamic "statement" {
+    for_each = length(var.development_account_numbers) > 0 ? [1] : []
+    content {
+      sid       = "EverythingInTheDevelopmentAccounts"
+      effect    = "Allow"
+      actions   = ["*"]
+      resources = ["*"]
+      condition {
+        test     = "StringEquals"
+        variable = "aws:PrincipalAccount"
+        values   = var.development_account_numbers
+      }
+    }
+  }
+
+  dynamic "statement" {
+    for_each = length(var.pipeline_account_numbers) > 0 ? [1] : []
+    content {
+      sid    = "RunThePipelinesInThePipelineAccounts"
+      effect = "Allow"
+      actions = [
+        "codepipeline:PutApprovalResult",
+        "codepipeline:RetryStageExecution",
+        "codepipeline:StartPipelineExecution",
+        "codepipeline:StopPipelineExecution",
+      ]
+      resources = ["*"]
+      condition {
+        test     = "StringEquals"
+        variable = "aws:PrincipalAccount"
+        values   = var.pipeline_account_numbers
+      }
+    }
+  }
+}
+
+resource "aws_ssoadmin_permission_set_inline_policy" "development" {
+  count              = var.project_name == "" ? 1 : 0
+  inline_policy      = var.development_inline_policy_json != null ? var.development_inline_policy_json : data.aws_iam_policy_document.development[0].json
+  instance_arn       = tolist(data.aws_ssoadmin_instances.identity_stores.arns)[0]
   permission_set_arn = aws_ssoadmin_permission_set.development[0].arn
 }
 
