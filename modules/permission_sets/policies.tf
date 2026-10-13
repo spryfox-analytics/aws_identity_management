@@ -23,6 +23,10 @@ locals {
       "codebuild:List*",
       "codepipeline:Get*",
       "codepipeline:List*",
+      "codeconnections:GetConnection",
+      "codeconnections:ListConnections",
+      "codestar-connections:GetConnection",
+      "codestar-connections:ListConnections",
     ]
     CloudTrailEventHistoryRead = [
       "cloudtrail:LookupEvents",
