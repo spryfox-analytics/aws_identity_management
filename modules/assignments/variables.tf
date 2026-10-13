@@ -15,6 +15,12 @@ variable "developers_account_numbers" {
   default     = []
 }
 
+variable "administrators_account_numbers" {
+  description = "Accounts to which the group '<group_prefix> Administrators' gets Administrator. Keep the group small; its members are usually also in Developers."
+  type        = list(string)
+  default     = []
+}
+
 variable "permission_set_names" {
   description = "Names of the permission sets by role, if they differ from the role names (e.g. with a name_prefix in the permission_sets module). Missing roles keep their default name."
   type = object({
@@ -22,6 +28,7 @@ variable "permission_set_names" {
     AgentViewer    = optional(string, "AgentViewer")
     Developer      = optional(string, "Developer")
     AgentDeveloper = optional(string, "AgentDeveloper")
+    Administrator  = optional(string, "Administrator")
   })
   default  = {}
   nullable = false

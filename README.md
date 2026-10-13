@@ -10,12 +10,12 @@ The repository root holds no Terraform code. The two submodules are used directl
 
 | Module | Level | Purpose |
 |---|---|---|
-| `modules/permission_sets` | customer, once per Identity Center instance | creates `Viewer`, `AgentViewer`, `Developer`, `AgentDeveloper` |
-| `modules/assignments` | project (or customer) | assigns them to the groups `<prefix> Viewers` and `<prefix> Developers` |
+| `modules/permission_sets` | customer, once per Identity Center instance | creates `Viewer`, `AgentViewer`, `Developer`, `AgentDeveloper`, `Administrator` |
+| `modules/assignments` | project (or customer) | assigns them to the groups `<prefix> Viewers`, `<prefix> Developers` and `<prefix> Administrators` |
 
 ```
-source = "git::https://github.com/spryfox-analytics/aws_identity_management.git//modules/permission_sets?ref=v2.0.0"
-source = "git::https://github.com/spryfox-analytics/aws_identity_management.git//modules/assignments?ref=v2.0.0"
+source = "git::https://github.com/spryfox-analytics/aws_identity_management.git//modules/permission_sets?ref=v2.1.0"
+source = "git::https://github.com/spryfox-analytics/aws_identity_management.git//modules/assignments?ref=v2.1.0"
 ```
 
 Both need Terraform 1.5 or newer and the AWS provider 5.0 or newer.
@@ -28,6 +28,7 @@ Both need Terraform 1.5 or newer and the AWS provider 5.0 or newer.
 | `AgentViewer` | AI agents | 1 h | as `Viewer` |
 | `Developer` | humans | 12 h | `Viewer`, everything in `development_account_numbers`, start, retry, stop and approve pipelines in `pipeline_account_numbers` |
 | `AgentDeveloper` | AI agents | 1 h | `Viewer`, everything in `agent_development_account_numbers` (default: `development_account_numbers`), start, retry and stop pipelines in `pipeline_account_numbers`, with the denials below |
+| `Administrator` | humans | 1 h | AdministratorAccess, for the exceptions: first setup and console-only tasks (activating connections, support cases); no agent counterpart |
 
 One permission set gives the same role in every account, so the rights of `Developer` and
 `AgentDeveloper` follow from conditions on the account of the role (`aws:PrincipalAccount`). In all
@@ -76,6 +77,9 @@ Secrets belong in Secrets Manager or Parameter Store, not there.
 - **Short sessions**: one hour instead of twelve limits what a leaked or misused session can do.
 - **Own development accounts**: `agent_development_account_numbers` can restrict agents to a part of
   the development accounts.
+- **No administration**: `Administrator` exists for humans only. Its group stays small and is used
+  for the exceptions; the daily work runs with `Developer`, and an agent never gets the
+  `Administrator` profile in its sandbox.
 
 The roles only help if the agent cannot reach the human credentials. Agents should run in a
 sandbox that sees only the AWS profiles of the agent roles (for example a separate AWS config with
@@ -90,7 +94,7 @@ Once per Identity Center instance, usually in the management account of the cust
 
 ```hcl
 module "permission_sets" {
-  source                      = "git::https://github.com/spryfox-analytics/aws_identity_management.git//modules/permission_sets?ref=v2.0.0"
+  source                      = "git::https://github.com/spryfox-analytics/aws_identity_management.git//modules/permission_sets?ref=v2.1.0"
   development_account_numbers = ["222222222222"]
   pipeline_account_numbers    = ["333333333333"]
   # optional
@@ -112,10 +116,12 @@ Per project (or once for the customer with the customer's groups), after the per
 
 ```hcl
 module "project_permissions" {
-  source                     = "git::https://github.com/spryfox-analytics/aws_identity_management.git//modules/assignments?ref=v2.0.0"
+  source                     = "git::https://github.com/spryfox-analytics/aws_identity_management.git//modules/assignments?ref=v2.1.0"
   group_prefix               = "Spryfox Skillmoor"
   viewers_account_numbers    = ["222222222222", "333333333333", "444444444444"]
   developers_account_numbers = ["222222222222", "333333333333", "444444444444"]
+  # Optional: full access for the exceptions, for a small group.
+  administrators_account_numbers = ["222222222222", "333333333333", "444444444444"]
 }
 ```
 
@@ -151,11 +157,14 @@ v2 creates nothing named `view`, `dev`, `admin` or `support`, so v1 and v2 can r
 3. **Finally**: when no project assigns the old permission sets any more, drop the v1 block from
    the customer stack. This deletes `view`, `dev`, `admin` and `support`.
 
-The old `admin` and `support` have no counterpart in v2. Accounts that still need them keep a v1
-block or get their own permission sets.
+The old `admin` corresponds to `Administrator` (since v2.1.0, with one-hour sessions); `support`
+has no counterpart. Accounts that still need it keep a v1 block or get their own permission set.
 
 ## Changes
 
+- **v2.1.0**: permission set `Administrator` (AdministratorAccess, humans only, 1 h,
+  `session_duration_administrators`) and the group `<prefix> Administrators` in `modules/assignments`
+  (`administrators_account_numbers`). Output `administrator_arn`.
 - **v2.0.0**: new major without backwards compatibility. Only the role model `Viewer`,
   `AgentViewer`, `Developer`, `AgentDeveloper`, split into the submodules `modules/permission_sets`
   and `modules/assignments`. Removed: the permission sets `view`, `dev`, `admin` and `support`, the

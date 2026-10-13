@@ -28,8 +28,14 @@ variable "session_duration_agents" {
   default     = "PT1H"
 }
 
+variable "session_duration_administrators" {
+  description = "Session duration of Administrator (ISO 8601)."
+  type        = string
+  default     = "PT1H"
+}
+
 variable "name_prefix" {
-  description = "Prefix of the permission set names. Empty means the names are exactly Viewer, AgentViewer, Developer and AgentDeveloper."
+  description = "Prefix of the permission set names. Empty means the names are exactly Viewer, AgentViewer, Developer, AgentDeveloper and Administrator."
   type        = string
   default     = ""
 

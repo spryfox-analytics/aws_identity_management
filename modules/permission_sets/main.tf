@@ -1,7 +1,8 @@
-# The four permission sets of the role model, created once per IAM Identity Center instance. Viewer and
+# The permission sets of the role model, created once per IAM Identity Center instance. Viewer and
 # Developer are for humans, AgentViewer and AgentDeveloper for AI agents. Agent sessions appear in
 # CloudTrail as AWSReservedSSO_Agent*, may not approve pipelines, may not create long-lived credentials
-# and are short.
+# and are short. Administrator is for humans only, for the exceptions that need full access (first
+# setup, console-only tasks such as activating connections); it has no agent counterpart.
 
 data "aws_ssoadmin_instances" "this" {}
 
@@ -31,6 +32,11 @@ locals {
       inline_policy    = data.aws_iam_policy_document.agent_developer.json
     }
   }
+
+  administrator = {
+    description      = "Administration access for humans, for the exceptions: AdministratorAccess, short sessions"
+    session_duration = var.session_duration_administrators
+  }
 }
 
 resource "aws_ssoadmin_permission_set" "this" {
@@ -58,4 +64,19 @@ resource "aws_ssoadmin_permission_set_inline_policy" "this" {
   instance_arn       = local.instance_arn
   inline_policy      = local.permission_sets[each.key].inline_policy
   permission_set_arn = each.value.arn
+}
+
+resource "aws_ssoadmin_permission_set" "administrator" {
+  name             = "${var.name_prefix}Administrator"
+  description      = local.administrator.description
+  instance_arn     = local.instance_arn
+  relay_state      = var.relay_state
+  session_duration = local.administrator.session_duration
+  tags             = var.tags
+}
+
+resource "aws_ssoadmin_managed_policy_attachment" "administrator_access" {
+  instance_arn       = local.instance_arn
+  managed_policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+  permission_set_arn = aws_ssoadmin_permission_set.administrator.arn
 }

@@ -8,13 +8,15 @@ locals {
   identity_store_id = tolist(data.aws_ssoadmin_instances.this.identity_store_ids)[0]
 
   roles_by_group = {
-    Viewers    = ["Viewer", "AgentViewer"]
-    Developers = ["Viewer", "AgentViewer", "Developer", "AgentDeveloper"]
+    Viewers        = ["Viewer", "AgentViewer"]
+    Developers     = ["Viewer", "AgentViewer", "Developer", "AgentDeveloper"]
+    Administrators = ["Administrator"]
   }
 
   account_numbers_by_group = {
-    Viewers    = distinct(var.viewers_account_numbers)
-    Developers = distinct(var.developers_account_numbers)
+    Viewers        = distinct(var.viewers_account_numbers)
+    Developers     = distinct(var.developers_account_numbers)
+    Administrators = distinct(var.administrators_account_numbers)
   }
 
   # Keys are "<group>/<account>/<role>".
