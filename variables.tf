@@ -48,3 +48,27 @@ variable "project_name" {
   type    = string
   default = ""
 }
+
+variable "agent_aware_roles" {
+  description = "Customer level only: create the permission sets Viewer, AgentViewer, Developer and AgentDeveloper of the role model for humans and AI agents."
+  type        = bool
+  default     = false
+}
+
+variable "agent_development_account_numbers" {
+  description = "Customer level only: accounts in which the permission set AgentDeveloper may do everything. Null means development_account_numbers."
+  type        = list(string)
+  default     = null
+}
+
+variable "role_viewers_account_numbers" {
+  description = "Accounts to which the group '<customer> [<project>] Viewers' gets the permission sets Viewer and AgentViewer."
+  type        = list(string)
+  default     = []
+}
+
+variable "role_developers_account_numbers" {
+  description = "Accounts to which the group '<customer> [<project>] Developers' gets the permission sets Developer, AgentDeveloper, Viewer and AgentViewer."
+  type        = list(string)
+  default     = []
+}
