@@ -14,8 +14,8 @@ The repository root holds no Terraform code. The two submodules are used directl
 | `modules/assignments` | project (or customer) | assigns them to the groups `<prefix> Viewers`, `<prefix> Developers` and `<prefix> Administrators` |
 
 ```
-source = "git::https://github.com/spryfox-analytics/aws_identity_management.git//modules/permission_sets?ref=v2.1.1"
-source = "git::https://github.com/spryfox-analytics/aws_identity_management.git//modules/assignments?ref=v2.1.1"
+source = "git::https://github.com/spryfox-analytics/aws_identity_management.git//modules/permission_sets?ref=v2.2.0"
+source = "git::https://github.com/spryfox-analytics/aws_identity_management.git//modules/assignments?ref=v2.2.0"
 ```
 
 Both need Terraform 1.5 or newer and the AWS provider 5.0 or newer.
@@ -94,7 +94,7 @@ Once per Identity Center instance, usually in the management account of the cust
 
 ```hcl
 module "permission_sets" {
-  source                      = "git::https://github.com/spryfox-analytics/aws_identity_management.git//modules/permission_sets?ref=v2.1.1"
+  source                      = "git::https://github.com/spryfox-analytics/aws_identity_management.git//modules/permission_sets?ref=v2.2.0"
   development_account_numbers = ["222222222222"]
   pipeline_account_numbers    = ["333333333333"]
   # optional
@@ -116,7 +116,7 @@ Per project (or once for the customer with the customer's groups), after the per
 
 ```hcl
 module "project_permissions" {
-  source                     = "git::https://github.com/spryfox-analytics/aws_identity_management.git//modules/assignments?ref=v2.1.1"
+  source                     = "git::https://github.com/spryfox-analytics/aws_identity_management.git//modules/assignments?ref=v2.2.0"
   group_prefix               = "Spryfox Skillmoor"
   viewers_account_numbers    = ["222222222222", "333333333333", "444444444444"]
   developers_account_numbers = ["222222222222", "333333333333", "444444444444"]
@@ -162,6 +162,9 @@ has no counterpart. Accounts that still need it keep a v1 block or get their own
 
 ## Changes
 
+- **v2.2.0**: operational read includes costs and budgets (Cost Explorer, Budgets, Billing, Free
+  Tier, Cost Optimization Hub), read only. In member accounts the billing console additionally
+  needs "IAM user and role access to billing information" activated in the account settings.
 - **v2.1.1**: operational read includes the status of CodeConnections (`GetConnection`,
   `ListConnections`), so viewers can see whether a pipeline source connection is available.
 - **v2.1.0**: permission set `Administrator` (AdministratorAccess, humans only, 1 h,

@@ -13,6 +13,18 @@ locals {
       "logs:StartQuery",
       "logs:StopQuery",
     ]
+    CostAndBudgetsRead = [
+      "budgets:Describe*",
+      "budgets:View*",
+      "ce:Describe*",
+      "ce:Get*",
+      "ce:List*",
+      "cost-optimization-hub:Get*",
+      "cost-optimization-hub:List*",
+      "billing:Get*",
+      "billing:List*",
+      "freetier:Get*",
+    ]
     CloudWatchMetricsAndAlarmsRead = [
       "cloudwatch:Describe*",
       "cloudwatch:Get*",
